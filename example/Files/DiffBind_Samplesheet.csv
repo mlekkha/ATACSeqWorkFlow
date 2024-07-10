@@ -1,0 +1,7 @@
+SampleID,Cell,Factor,Condition,Replicate,bamReads,Peaks,PeakCaller
+ControlRep1,MDA-231,GFP,Control,1,~/ATACSeqWorkFlow-master/example/bc_out/marked_reads/ControlRep1.bam,~/ATACSeqWorkFlow-master/example/bc_out/peaks/ControlRep1_peaks/ControlRep1_peaks.xls,macs
+ControlRep2,MDA-231,GFP,Control,2,~/ATACSeqWorkFlow-master/example/bc_out/marked_reads/ControlRep2.bam,~/ATACSeqWorkFlow-master/example/bc_out/peaks/ControlRep2_peaks/ControlRep2_peaks.xls,macs
+ControlRep3,MDA-231,GFP,Control,3,~/ATACSeqWorkFlow-master/example/bc_out/marked_reads/ControlRep3.bam,~/ATACSeqWorkFlow-master/example/bc_out/peaks/ControlRep3_peaks/ControlRep3_peaks.xls,macs
+GATA3Rep1,MDA-231,GATA3,Treated,1,~/ATACSeqWorkFlow-master/example/bc_out/marked_reads/GATA3Rep1.bam,~/ATACSeqWorkFlow-master/example/bc_out/peaks/GATA3Rep1_peaks/GATA3Rep1_peaks.xls,macs
+GATA3Rep2,MDA-231,GATA3,Treated,2,~/ATACSeqWorkFlow-master/example/bc_out/marked_reads/GATA3Rep2.bam,~/ATACSeqWorkFlow-master/example/bc_out/peaks/GATA3Rep2_peaks/GATA3Rep2_peaks.xls,macs
+GATA3Rep3,MDA-231,GATA3,Treated,3,~/ATACSeqWorkFlow-master/example/bc_out/marked_reads/GATA3Rep3.bam,~/ATACSeqWorkFlow-master/example/bc_out/peaks/GATA3Rep3_peaks/GATA3Rep3_peaks.xls,macs

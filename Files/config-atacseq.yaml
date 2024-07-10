@@ -1,0 +1,121 @@
+# config-atacseq.yaml: config file for Manu lab's ATAC-Seq snakemake
+# pipeline
+#
+# Trevor 06/6/24
+#
+# Specifies the location of the data and parameter values of the 
+# tools. Uncomment and customize.
+
+# Location of the data (absolute path). If not specified, data are assumed
+# to be located in the current working directory.
+# Example:
+# indir: /labcommon/SequenceData/Public/Heinz1005-GSE21512/
+
+indir: <path_to_sequence_files>
+
+# The sample names and filenames/paths relative to indir. The sample name
+# will be utilized as a stub in naming all intermediate and final output of
+# the pipeline. The filenames should not include the extension, which is
+# specified in a separate field.
+
+
+samples: 
+    <samplename>: 
+        read1: <read1_filename>
+        read2: <read2_filename>
+     
+# The extension of the read files
+#
+# Example:
+#
+# file_extension: fastq.gz
+
+file_extension: <readfile_extension>
+
+# Threads to run analysis with
+#
+# Example:
+#
+# threads_used: 8
+
+threads_used: <number_threads>
+
+# Trimmomatic parameters
+
+# Trimmomatic jar path
+#
+# phred encoding
+#
+# Example:
+#
+# trim_phred_encoding: phred33
+
+trim_phred_encoding: <phredEncoding>
+
+# steps
+# specify the processing steps one after the other
+#
+# Example:
+#
+# steps: ILLUMINACLIP:/usr/local/Trimmomatic/Trimmomatic-0.39/adapters/TruSeq2-SE.fa:2:30:10:3:TRUE MINLEN:20 
+
+trim_steps: <Trimmomatic_trimSteps>
+
+
+# hisat2 parameters
+
+# hisat2 index
+#
+# Example:
+#
+# hisat2_index: /labcommon/SequenceData/Genome/Mouse/mm10/hisat2-index/genome
+
+hisat2_index: <path_to_hisat2_index>
+
+# other hisat2 arguments
+#
+# Example:
+#
+#
+# single-ended libraries
+# hisat2_args: --no-spliced-alignment
+#
+# paired-ended libraries
+# hisat2_args: --no-spliced-alignment --minins 10 --maxins 2000
+
+hisat2_args: <hisat2_arguments>
+
+# memory for samtools sort
+#
+# Example:
+#
+# sorting_memory: 6G
+
+sorting_memory: <memory_allocated_per_thread>
+
+# macs2 parameters
+    
+# macs2 command line arguments other than input, output, name, and control
+#
+# Example:
+#
+# macs2_args: --format BAMPE --bdg --SPMR --gsize mm --qvalue 0.05
+# --gsize for hg38 human genome is 3209286105 bp when calculated from latest chrominfo
+
+macs2_args: <macs2_arguments>
+
+# chromInfo needed for bedgraphToBigwig
+#
+# Example:
+#
+# chromInfo: /labcommon/SequenceData/Genome/Mouse/mm10/mm10_chrominfo.txt
+
+chromInfo: <path_to_chromsizes.txt>
+
+
+
+
+
+
+
+

@@ -1,0 +1,7 @@
+SampleID,BAMfile,Reads
+ControlRep1,~/ATACSeqWorkFlow-master/example/bc_out/marked_reads/ControlRep1.bam,81781359
+ControlRep2,~/ATACSeqWorkFlow-master/example/bc_out/marked_reads/ControlRep2.bam,62568381
+ControlRep3,~/ATACSeqWorkFlow-master/example/bc_out/marked_reads/ControlRep3.bam,59200716
+GATA3Rep1,~/ATACSeqWorkFlow-master/example/bc_out/marked_reads/GATA3Rep1.bam,57081455
+GATA3Rep2,~/ATACSeqWorkFlow-master/example/bc_out/marked_reads/GATA3Rep2.bam,55454536
+GATA3Rep3,~/ATACSeqWorkFlow-master/example/bc_out/marked_reads/GATA3Rep3.bam,49346916

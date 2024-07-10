@@ -1,0 +1,201 @@
+# This snakemake script is used to preprocess ATAC-Seq data that has been sequenced using Illumina NGS
+# Author: Trevor Long
+# Last Modified: 06/20/2024
+
+### Note 1: MUST BE RUN IN CONDA ENVIRONMENT WITH THE TOOLS BELOW INSTALLED.
+###         IF RUN WITHOUT CONDA, SCRIPT MUST BE MODIFIED AND GIVE FULL TRIMMOMATIC AND PICARD .JAR FILE PATHS
+
+# Tools needed
+# 1. FastQC
+# 2. Trimmomatic
+# 3. Hisat2
+# 4. Macs2
+# 5. bedGraphToBigWig
+# 6. Picard
+# 7. Samtools
+
+# config file must be in the same directory as the ATACSeq_Preprocessing_Snakefile.yaml if not specified
+configfile: "config-atacseq.yaml"
+
+# Functions
+def get_inputread1_fastqs(wildcards):
+    return os.path.join(config["indir"], \
+            config["samples"][wildcards.sample]["read1"] +\
+            "." + config["file_extension"])
+
+def get_inputread2_fastqs(wildcards):
+    return os.path.join(config["indir"], \
+            config["samples"][wildcards.sample]["read2"] +\
+            "." + config["file_extension"])
+
+# Pipeline
+rule all:
+    input:
+        expand("peaks/{sample}.bw", sample=config["samples"])
+
+rule initial_qc:
+    input:
+        read1=get_inputread1_fastqs,
+        read2=get_inputread2_fastqs
+    output:
+        directory("initialQC/{sample}")
+    params:
+        threads=config["threads_used"]
+    shell:
+        "mkdir -p initialQC/{wildcards.sample} ; "
+        "nice -n 19 fastqc -t {params.threads} {input.read1} {input.read2} -o {output}"
+
+rule trim_adaptors:
+    input: 
+        read1=get_inputread1_fastqs,
+        read2=get_inputread2_fastqs,
+        qcoutput="initialQC/{sample}"
+    output: 
+        read1=temp("trimmed/{sample}_1P.fq.gz"),
+        read2=temp("trimmed/{sample}_2P.fq.gz"),
+        read1U=temp("trimmed/{sample}_1U.fq.gz"),
+        read2U=temp("trimmed/{sample}_2U.fq.gz"),
+        stats="trimmed/{sample}_trimStats.txt"
+    params:
+        phred_encoding=config["trim_phred_encoding"],
+        steps=config["trim_steps"],
+        threads=config["threads_used"]
+    shell:
+        "nice -n 19 trimmomatic "
+        "PE -threads {params.threads} -{params.phred_encoding} "
+        "-summary {output.stats} "
+        "{input.read1} {input.read2} -baseout trimmed/{wildcards.sample}.fq.gz {params.steps}"
+
+rule trimmed_qc:
+    input:
+        read1="trimmed/{sample}_1P.fq.gz",
+        read2="trimmed/{sample}_2P.fq.gz"
+    output:
+        html1P="trimmedQC/{sample}_1P_fastqc.html",
+        zip1P=temp("trimmedQC/{sample}_1P_fastqc.zip"),
+        html2P="trimmedQC/{sample}_2P_fastqc.html",
+        zip2P=temp("trimmedQC/{sample}_2P_fastqc.zip")
+    params:
+        threads=config["threads_used"]
+    shell:
+        "nice -n 19 fastqc -t {params.threads} -o trimmedQC {input}"
+        
+rule map_reads_hisat2:
+    input:
+        read1="trimmed/{sample}_1P.fq.gz",
+        read2="trimmed/{sample}_2P.fq.gz",
+        html1P="trimmedQC/{sample}_1P_fastqc.html",
+        zip1P="trimmedQC/{sample}_1P_fastqc.zip",
+        html2P="trimmedQC/{sample}_2P_fastqc.html",
+        zip2P="trimmedQC/{sample}_2P_fastqc.zip"
+    output:
+        temp("alignments/{sample}.bam")
+    params:
+        genome_index=config["hisat2_index"],
+        hisat2_args=config["hisat2_args"],
+        threads=config["threads_used"]
+    shell:
+        "nice -n 19 hisat2 -1 {input.read1} -2 {input.read2} "
+        "-x {params.genome_index} "
+        "-p {params.threads} "
+        "{params.hisat2_args} "
+        "| samtools view -b - > {output} "
+
+rule filter_properly_paired:
+    input:
+        "alignments/{sample}.bam"
+    output:
+        temp("paired_reads/{sample}.bam")
+    shell:
+        "samtools view -b -f2 {input} > {output}"
+
+rule sort_reads:
+    input:
+        "paired_reads/{sample}.bam"
+    output:
+        temp("sorted_reads/{sample}.bam")
+    params:
+        memory=config["sorting_memory"],
+        threads=config["threads_used"]
+    shell:
+        "nice -n 19 samtools sort "
+        "-@ {params.threads} "
+        "-m {params.memory} "
+        "-T sorted_reads/{wildcards.sample} "
+        "-O bam "
+        "-o {output} {input}"
+        
+rule index_reads:
+    input:
+        "sorted_reads/{sample}.bam"
+    output:
+        temp("sorted_reads/{sample}.bam.bai")
+    shell:
+        "nice -n 19 samtools index {input}"
+        
+rule get_fragment_size:
+    input: 
+        "sorted_reads/{sample}.bam"
+    output:
+        insert_metrics="insert_info/{sample}_insertMetrics.txt",
+        insert_histogram="insert_info/{sample}_insertHist.pdf"
+    shell:
+        "nice -n 19 picard "
+        "CollectInsertSizeMetrics I={input} "
+        "O={output.insert_metrics} "
+        "H={output.insert_histogram}"
+
+rule mark_duplicates:
+    input: 
+        "sorted_reads/{sample}.bam"
+    output:
+        "marked_reads/{sample}.bam"
+    log:
+        "marked_reads/{sample}_dupInfo.txt"
+    shell:
+        "nice -n 19 picard "
+        "MarkDuplicates "
+        "I={input} "
+        "O={output} "
+        "M={log}"
+
+rule index_marked_reads:
+    input:
+        "marked_reads/{sample}.bam"
+    output:
+        "marked_reads/{sample}.bam.bai"
+    shell:
+        "nice -n 19 samtools index {input}"
+
+rule call_peaks_macs2:
+    input:
+        treatment="marked_reads/{sample}.bam",
+    output:
+        directory("peaks/{sample}_peaks")
+    params:
+        macs2_args=config["macs2_args"]
+    shell:
+        "nice -n 19 macs2 callpeak "
+        "--treatment {input.treatment} "
+        "--outdir {output} "
+        "--name {wildcards.sample} "
+        "{params.macs2_args}"
+
+rule sort_bedGraph:
+    input:
+        "peaks/{sample}_peaks"
+    output:
+        temp("peaks/{sample}_tmp.bdg")
+    shell:
+        "nice -n 19 sort "
+        "-k1,1 -k2,2n {input}/{wildcards.sample}_treat_pileup.bdg > {output}"
+
+rule convert_to_bigWig:
+    input:
+        "peaks/{sample}_tmp.bdg"
+    output:
+        "peaks/{sample}.bw"
+    params:
+        chromInfo=config["chromInfo"]
+    shell:
+        "nice -n 19 bedGraphToBigWig {input} {params.chromInfo} {output}"
