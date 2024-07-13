@@ -54,17 +54,19 @@ createATACDataTable <- function(samplesheet = "./",
                                 numSamplesinPool = 1){
   
   # load in required packages and functions
-  require(reshape2, quietly = TRUE) || BiocManager::install("reshape2")
-  require(ggplot2, quietly = TRUE) || BiocManager::install("ggplot2")
-  require(zoo, quietly = TRUE) || BiocManager::install("zoo")
-  require(gridExtra, quietly = TRUE) || BiocManager::install("gridExtra")
-  require(GenomicAlignments, quietly = TRUE) || BiocManager::install("GenomicAlignments")
-  require(BSgenome, quietly = TRUE) || BiocManager::install("BSgenome")
-  genomeBS <- suppressMessages(grep(genome, available.genomes(), value = TRUE)[[1]])
-  if (!require(genomeBS, character.only = TRUE)){
-    library(genomeBS, character.only = TRUE)
-  }
-  require(GenomeInfoDb, quietly = TRUE) || BiocManager::install("GenomeInfoDb")
+  require(reshape2) 
+  require(ggplot2) 
+  require(zoo) 
+  require(gridExtra) 
+  require(GenomicAlignments) 
+  require(BSgenome) 
+  require(GenomeInfoDb)
+
+  #genomeBS <- suppressMessages(grep(genome, available.genomes(), value = TRUE)[[1]])
+
+  #if (!require(genomeBS, character.only = TRUE)){
+  #  library(genomeBS, character.only = TRUE)
+  #}
 
   # If biascorrect is false, function will count raw cuts
   if (biascorrect == FALSE){
@@ -461,10 +463,10 @@ countTn5eventsByRegion <- function(samplesheet = "./",
 {
   
   ###Load libraries needed
-  require(GenomicAlignments, quietly = TRUE) || BiocManager::install("GenomicAlignments")
-  require(GenomicRanges, quietly = TRUE) || BiocManager::install("GenomicRanges")
-  require(Rsamtools, quietly = TRUE) || BiocManager::install("Rsamtools")
-  require(GenomicFeatures, quietly = TRUE) || BiocManager::install("GenomicFeatures")
+  require(GenomicAlignments) 
+  require(GenomicRanges) 
+  require(Rsamtools) 
+  require(GenomicFeatures)
   
   # check that regions is not NULL, that it is a GRanges object and that
   # it is not empty
@@ -714,13 +716,14 @@ makeLocusGRange <- function(chrom = NA,
                             rstart = NA,
                             rend = NA){
   
+  # load in required package to convert dataframe into grange/grangelist
+  require(GenomicAlignments)
+
   # Input error handling
   if (class(chrom) != "character"){
     stop(paste("chrom must be a character (i.e 'chr7')"))
   }
   
-  # load in required package to convert dataframe into grange/grangelist
-  require(GenomicAlignments, quietly = TRUE) || BiocManager::install("GenomicAlignments")
 
   # Create a dataframe of input information
   # if vectors are given in the inputs, first row of dataframe will represent the first element of the input vectors
@@ -791,7 +794,7 @@ CalculateAdjustedPValues <- function(x,
                                      genomeCircular = FALSE){
   
   # libraries
-  require(GenomeInfoDb, quietly = TRUE) || BiocManager::install("GenomeInfoDb")
+  require(GenomeInfoDb)
   
   # Initilize a p_value column
   x$P_Value <- 0
@@ -848,9 +851,9 @@ IdentifyFootprints <- function(x,
                                manualThreshold = NA){
   
   # Load in libraries needed
-  require(dplyr, quietly = TRUE) || BiocManager::install("dplyr")
-  require(ggplot2, quietly = TRUE) || BiocManager::install("ggplot2")
-  require(BSgenome, quietly = TRUE) || BiocManager::install("BSgenome")
+  require(dplyr) 
+  require(ggplot2) 
+  require(BSgenome)
 
   # Summarize the cuts
   footprintdf <- x %>%
@@ -965,9 +968,9 @@ MatchJASPARMotifs <- function(JASPARmatrix = "./",
                               motifname = NA){
   
   # Libraries
-  require(TFBSTools, quietly = TRUE) || BiocManager::install("TFBSTools")
-  require(Biostrings, quietly = TRUE) || BiocManager::install("Biostrings")
-  require(MatrixGenerics, quietly = TRUE) || BiocManager::install("MatrixGenerics")
+  require(TFBSTools) 
+  require(Biostrings) 
+  require(MatrixGenerics)
   
   # Read in JASPAR motif matrix (MUST BE IN JASPAR FORMAT)
   motifs <- readJASPARMatrix(JASPARmatrix)
@@ -1061,14 +1064,17 @@ shiftBAMs <- function(indir = "./",
                       isSupplementaryAlignment = FALSE){
   
   # libraries
-  require(ATACseqQC, quietly = TRUE) || BiocManager::install("ATACseqQC")
-  require(ChIPpeakAnno, quietly = TRUE) || BiocManager::install("ChIPpeakAnno")
-  require(BSgenome, quietly = TRUE) || BiocManager::install("BSgenome")
-  genomeBS <- suppressMessages(grep(genome, available.genomes(), value = TRUE)[[1]])
-  if (!require(genomeBS, character.only = TRUE)){
-    library(genomeBS, character.only = TRUE)
-  }
-  require(stringr, quietly = TRUE) || BiocManager::install("stringr")
+  require(ATACseqQC) 
+  require(ChIPpeakAnno) 
+  require(BSgenome) 
+  require(stringr)
+
+
+  #genomeBS <- suppressMessages(grep(genome, available.genomes(), value = TRUE)[[1]])
+
+  #if (!require(genomeBS, character.only = TRUE)){
+  #  library(genomeBS, character.only = TRUE)
+  #}
   
   # message
   print("Beginning BAM shifting")
